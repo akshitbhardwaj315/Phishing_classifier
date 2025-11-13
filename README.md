@@ -71,17 +71,29 @@ The live application is hosted on **Hugging Face Spaces** with automated builds 
 
 Our MLOps pipeline leverages Git LFS as an artifact store, seamlessly integrated into the Docker build process:
 
-```mermaid
-graph TD
-    A[💻 Git + Git LFS<br/>Code + Model] -->|Push| B[🤗 Hugging Face<br/>CI/CD & Host]
-    B -->|Build Docker Image| C[🐳 Docker Container]
-    B -->|Pull LFS Model| C
-    C -->|Deploy| D[🚀 Running Application<br/>Ready to Predict]
-    
-    style A fill:#e1f5ff
-    style B fill:#fff3e0
-    style C fill:#e8f5e9
-    style D fill:#f3e5f5
+```
+📦 Git Repository + Git LFS
+    ├── Source Code
+    └── model.pkl (Large File)
+           |
+           | (git push)
+           ↓
+🤗 Hugging Face Spaces
+    ├── Triggers CI/CD Pipeline
+    ├── Pulls LFS model.pkl
+    └── Builds Docker Image
+           |
+           | (automated deployment)
+           ↓
+🐳 Docker Container
+    ├── FastAPI Application
+    ├── Loaded model.pkl
+    └── Gunicorn Server
+           |
+           | (serves)
+           ↓
+🌐 Live Production API
+    └── Ready for predictions!
 ```
 
 ---
