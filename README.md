@@ -104,7 +104,7 @@ Our MLOps pipeline leverages Git LFS as an artifact store, seamlessly integrated
 
 The application is **publicly accessible** and automatically deployed:
 
-🔗 **[Live API Documentation](https://huggingface.co/spaces/Akshit315/phishing-classifier/docs)**
+🔗 **[Live API Documentation](https://huggingface.co/spaces/Akshit315/phishing-classifier/)**
 
 > A `git push` to the Hugging Face remote triggers automatic Docker build and deployment.
 
@@ -170,7 +170,6 @@ python main.py
 | `POST` | `/predict-multi-url` | Batch URL analysis (CSV) |
 | `POST` | `/predict` | CSV file upload analysis |
 
-> 📖 **Full interactive docs:** [https://huggingface.co/spaces/Akshit315/phishing-classifier/docs](https://huggingface.co/spaces/Akshit315/phishing-classifier/docs)
 
 ---
 
