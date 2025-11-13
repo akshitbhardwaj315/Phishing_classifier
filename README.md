@@ -13,7 +13,7 @@ app_port: 8000
 
 ### *Production-Ready MLOps Deployment*
 
-LIVE API DEMO: https://huggingface.co/spaces/Akshit315/phishing-classifier/docs
+LIVE API DEMO: https://huggingface.co/spaces/Akshit315/phishing-classifier/
 </div>
 
 ---
