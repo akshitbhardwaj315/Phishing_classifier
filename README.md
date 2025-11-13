@@ -13,15 +13,7 @@ app_port: 8000
 
 ### *Production-Ready MLOps Deployment*
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Hugging_Face-yellow)](https://huggingface.co/spaces/Akshit315/phishing-classifier)
-[![API Docs](https://img.shields.io/badge/📚_API_Docs-FastAPI-009688)](https://huggingface.co/spaces/Akshit315/phishing-classifier/docs)
-[![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED)](https://www.docker.com/)
-
-*A machine learning web application for detecting phishing URLs through comprehensive feature analysis*
-
-[Live Demo](https://huggingface.co/spaces/Akshit315/phishing-classifier/docs) • [Getting Started](#running-the-application) • [API Documentation](#api-documentation) • [Contact](#contact)
-
+LIVE API DEMO: https://huggingface.co/spaces/Akshit315/phishing-classifier/docs
 </div>
 
 ---
