@@ -27,4 +27,4 @@ USER appuser
 # Use the $PORT variable provided by the platform (like Hugging Face),
 # or default to 8000 if it's not set.
 ENV PORT=${PORT:-8000}
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "-b", "0.0.0.0:$PORT"]
+CMD gunicorn -w 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT main:app
