@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing URL Detection</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+        .container{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-width:600px;width:100%;padding:40px;animation:slideUp .5s ease}
+        @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+        .header{text-align:center;margin-bottom:35px}
+        .header h1{color:#333;font-size:28px;margin-bottom:8px}
+        .header p{color:#666;font-size:14px}
+        .tabs{display:flex;gap:10px;margin-bottom:30px;border-bottom:2px solid #e0e0e0}
+        .tab{flex:1;padding:12px;background:0 0;border:none;cursor:pointer;font-size:15px;font-weight:600;color:#888;transition:all .3s;border-bottom:3px solid transparent}
+        .tab.active{color:#667eea;border-bottom-color:#667eea}
+        .tab-content{display:none}
+        .tab-content.active{display:block}
+        .url-input-group{margin-bottom:25px}
+        .url-input-group label{display:block;color:#333;font-weight:600;margin-bottom:10px;font-size:14px}
+        .url-input{width:100%;padding:14px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;transition:border-color .3s}
+        .url-input:focus{outline:0;border-color:#667eea}
+        .upload-zone{border:2px dashed #667eea;border-radius:12px;padding:40px 20px;text-align:center;background:#f8f9ff;margin-bottom:25px;transition:all .3s;cursor:pointer}
+        .upload-zone:hover,.upload-zone.dragover{border-color:#764ba2;background:#f0f1ff}
+        .upload-icon{font-size:48px;margin-bottom:15px}
+        .upload-zone h3{color:#667eea;font-size:18px;margin-bottom:8px}
+        .upload-zone p{color:#888;font-size:13px}
+        input[type=file]{display:none}
+        .file-info{background:#e8f5e9;padding:12px 16px;border-radius:8px;margin-bottom:20px;display:none;align-items:center;gap:10px}
+        .file-info.show{display:flex}
+        .file-info span{color:#2e7d32;font-size:14px;flex:1}
+        .remove-file{background:0 0;border:none;color:#d32f2f;cursor:pointer;font-size:20px}
+        .submit-btn{width:100%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:14px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:10px;}
+        .submit-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(102,126,234,.4)}
+        .submit-btn:disabled{background:#ccc;cursor:not-allowed;transform:none}
+        .btn-secondary{background: #555;}
+        .btn-secondary:hover{background:#333; box-shadow: 0 8px 20px rgba(85, 85, 85, 0.3);}
+        .loader{display:none;text-align:center;margin-top:20px}
+        .loader.show{display:block}
+        .spinner{border:3px solid #f3f3f3;border-top:3px solid #667eea;border-radius:50%;width:40px;height:40px;animation:spin 1s linear infinite;margin:0 auto}
+        @keyframes spin{100%{transform:rotate(360deg)}}
+        .loader p{margin-top:15px;color:#667eea;font-size:14px}
+        .result{display:none;margin-top:25px;padding:20px;border-radius:12px;animation:slideUp .3s ease}
+        .result.show{display:block}
+        .result.safe{background:#d4edda;border:2px solid #28a745}
+        .result.danger{background:#f8d7da;border:2px solid #dc3545}
+        .result.warning{background:#fff3cd;border:2px solid #ffc107}
+        .result-header{display:flex;align-items:center;gap:15px;margin-bottom:12px}
+        .result-icon{font-size:36px}
+        .result-title{font-size:22px;font-weight:700}
+        .result.safe .result-title{color:#28a745}
+        .result.danger .result-title{color:#dc3545}
+        .result.warning .result-title{color:#d39e00}
+        .result-url{background:rgba(0,0,0,.05);padding:10px;border-radius:6px;margin-bottom:12px;word-break:break-all;font-size:13px;color:#333}
+        .result-message{margin-bottom:15px;font-size:15px;color:#555}
+        .result-features{margin-top:20px;max-height:200px;overflow-y:auto;background:rgba(0,0,0,.05);padding:15px;border-radius:8px;font-family:monospace;font-size:12px;color:#333}
+        .result-features h4{font-family:'Segoe UI',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px;color:#555}
+        .result-features pre{white-space:pre-wrap;word-break:break-all}
+        /* New styles for batch URL */
+        textarea.url-input { resize: vertical; min-height: 150px; line-height: 1.6; }
+        .estimate-text { text-align: center; margin-top: 15px; font-size: 14px; color: #555; display: none; }
+        .estimate-text.show { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Phishing Detection</h1>
+            <p>Analyze URLs or upload CSV files for phishing detection</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="url">🔗 Check URL</button>
+            <button class="tab" data-tab="multi-url">🌍 Batch URLs</button>
+            <button class="tab" data-tab="file">📁 Upload CSV</button>
+        </div>
+
+        <div class="tab-content active" id="url-tab">
+            <div class="url-input-group">
+                <label for="urlInput">Enter URL to analyze:</label>
+                <input type="text" id="urlInput" class="url-input" placeholder="https://example.com">
+            </div>
+            <button class="submit-btn" id="urlSubmitBtn">Analyze (Quick Look)</button>
+            <button class="submit-btn btn-secondary" id="urlDownloadBtn">Analyze & Download Report</button>
+
+            <div class="result" id="urlResult">
+                <div class="result-header">
+                    <span class="result-icon" id="urlIcon"></span>
+                    <span class="result-title" id="urlTitle"></span>
+                </div>
+                <div class="result-url" id="urlDisplay"></div>
+                <div class="result-message" id="urlMessage"></div>
+                <div class="result-features" id="urlFeatures"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="multi-url-tab">
+            <form id="multiUrlForm">
+                <div class="url-input-group">
+                    <label for="multiUrlInput">Paste URLs (one per line):</label>
+                    <textarea id="multiUrlInput" class="url-input" placeholder="https://example1.com&#10;https://example2.com&#10;..."></textarea>
+                </div>
+                <p id="multiUrlEstimate" class="estimate-text"></p>
+                <button type="submit" class="submit-btn" id="multiUrlSubmitBtn">Analyze & Download CSV</button>
+            </form>
+        </div>
+
+        <div class="tab-content" id="file-tab">
+            <form id="uploadForm">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📂</div>
+                    <h3>Click to upload or drag and drop</h3>
+                    <p>CSV files only (Max 10MB)</p>
+                    <input type="file" id="fileInput" name="file" accept=".csv" required>
+                </div>
+
+                <div class="file-info" id="fileInfo">
+                    <span id="fileName">No file selected</span>
+                    <button type="button" class="remove-file" id="removeFile">×</button>
+                </div>
+
+                <button type="submit" class="submit-btn" id="fileSubmitBtn">Analyze File</button>
+            </form>
+        </div>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p id="loaderText">Processing...</p>
+        </div>
+    </div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const tabs = document.querySelectorAll('.tab');
+        const uploadZone = $('uploadZone');
+        const fileInput = $('fileInput');
+        const fileInfo = $('fileInfo');
+        const fileName = $('fileName');
+        const uploadForm = $('uploadForm');
+        const multiUrlForm = $('multiUrlForm');
+        const loader = $('loader');
+        const loaderText = $('loaderText');
+        const urlResult = $('urlResult');
+
+        // --- Tab Navigation ---
+        tabs.forEach(tab => {
+            tab.onclick = () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                tab.classList.add('active');
+                $(`${tab.dataset.tab}-tab`).classList.add('active');
+                urlResult.classList.remove('show');
+            };
+        });
+
+        // --- File Upload Tab Logic ---
+        uploadZone.onclick = () => fileInput.click();
+        fileInput.onchange = e => handleFile(e.target.files[0]);
+        $('removeFile').onclick = () => {
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+        };
+        ['dragover', 'dragleave', 'drop'].forEach(evt => {
+            uploadZone.addEventListener(evt, e => {
+                e.preventDefault();
+                uploadZone.classList[evt === 'dragover' ? 'add' : 'remove']('dragover');
+                if (evt === 'drop') handleFile(e.dataTransfer.files[0]);
+            });
+        });
+
+        function handleFile(file) {
+            if (file) {
+                if (!file.name.endsWith('.csv')) {
+                    alert('Please upload a CSV file');
+                    return;
+                }
+                if (file.size > 10485760) {
+                    alert('File size exceeds 10MB');
+                    return;
+                }
+                fileInput.files = new DataTransfer().files; // Clear and set
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+                
+                fileName.textContent = file.name;
+                fileInfo.classList.add('show');
+            }
+        }
+
+        uploadForm.onsubmit = async e => {
+            e.preventDefault();
+            if (!fileInput.files[0]) {
+                alert('Please select a file to upload.');
+                return;
+            }
+            
+            const btn = $('fileSubmitBtn');
+            btn.disabled = true;
+            loaderText.textContent = 'Processing file...';
+            loader.classList.add('show');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/predict', { method: 'POST', body: formData });
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.detail || 'File processing failed');
+                }
+                const blob = await res.blob();
+                downloadBlob(blob, 'predictions.csv');
+            } catch(err) {
+                alert('❌ Analysis failed: ' + err.message);
+            } finally {
+                loader.classList.remove('show');
+                btn.disabled = false;
+            }
+        };
+        
+        // --- Single URL Tab Logic ---
+        $('urlSubmitBtn').onclick = async () => {
+            const url = $('urlInput').value.trim();
+            if (!url) return alert('Please enter a URL');
+
+            const btn = $('urlSubmitBtn');
+            btn.disabled = true;
+            $('urlDownloadBtn').disabled = true;
+            urlResult.classList.remove('show');
+            loaderText.textContent = 'Analyzing URL...';
+            loader.classList.add('show');
+
+            try {
+                const res = await fetch('/predict-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url})
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    throw new Error(data.detail || 'Analysis failed');
+                }
+                showResult(data);
+            } catch (err) {
+                alert('❌ Analysis failed: ' + err.message);
+            } finally {
+                loader.classList.remove('show');
+                btn.disabled = false;
+                $('urlDownloadBtn').disabled = false;
+            }
+        };
+
+        // NEW: Single URL Download Button
+        $('urlDownloadBtn').onclick = async () => {
+            const url = $('urlInput').value.trim();
+            if (!url) return alert('Please enter a URL');
+
+            const btn = $('urlDownloadBtn');
+            btn.disabled = true;
+            $('urlSubmitBtn').disabled = true;
+            urlResult.classList.remove('show');
+            loaderText.textContent = 'Analyzing and building report...';
+            loader.classList.add('show');
+
+            try {
+                const res = await fetch('/download-url-report', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url})
+                });
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.detail || 'Report generation failed');
+                }
+                const blob = await res.blob();
+                const filename = (res.headers.get('content-disposition') || '').split('filename=')[1]?.replace(/"/g, '') || 'report.csv';
+                downloadBlob(blob, filename);
+            } catch (err) {
+                alert('❌ Report failed: ' + err.message);
+            } finally {
+                loader.classList.remove('show');
+                btn.disabled = false;
+                $('urlSubmitBtn').disabled = false;
+            }
+        };
+
+        // --- NEW: Batch URL Tab Logic ---
+        multiUrlForm.onsubmit = async e => {
+            e.preventDefault();
+            const text = $('multiUrlInput').value;
+            const urls = text.split('\n').map(u => u.trim()).filter(Boolean);
+            
+            if (urls.length === 0) {
+                alert('Please paste at least one URL.');
+                return;
+            }
+
+            const btn = $('multiUrlSubmitBtn');
+            btn.disabled = true;
+            
+            // Show precise time estimate
+            const estimate = (urls.length * 1.5).toFixed(0); // 1.5s per URL heuristic
+            const estimateText = $('multiUrlEstimate');
+            estimateText.textContent = `Processing ${urls.length} URLs. Estimated time: ~${estimate} seconds.`;
+            estimateText.classList.add('show');
+            
+            loaderText.textContent = `Analyzing ${urls.length} URLs...`;
+            loader.classList.add('show');
+            
+            try {
+                const res = await fetch('/predict-multi-url', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({urls})
+                });
+                if (!res.ok) {
+                    const error = await res.json();
+                    throw new Error(error.detail || 'Batch processing failed');
+                }
+                const blob = await res.blob();
+                const filename = (res.headers.get('content-disposition') || '').split('filename=')[1]?.replace(/"/g, '') || 'batch_report.csv';
+                downloadBlob(blob, filename);
+            } catch(err) {
+                alert('❌ Batch analysis failed: ' + err.message);
+            } finally {
+                loader.classList.remove('show');
+                estimateText.classList.remove('show');
+                btn.disabled = false;
+            }
+        };
+
+        // --- Helper Functions ---
+        function showResult(data) {
+            const statuses = {
+                safe: {icon: '✓', title: 'SAFE', msg: 'This URL appears legitimate and safe.', cls: 'safe'},
+                danger: {icon: '⚠', title: 'PHISHING', msg: 'Warning! This URL is potentially dangerous.', cls: 'danger'},
+                warning: {icon: '⚠️', title: 'SUSPICIOUS', msg: 'This URL could not be verified. Exercise caution.', cls: 'warning'}
+            };
+            const status = statuses[data.status] || statuses.warning;
+            
+            $('urlIcon').textContent = status.icon;
+            $('urlTitle').textContent = status.title;
+            $('urlMessage').textContent = data.message;
+            $('urlDisplay').textContent = data.url;
+            
+            const featuresEl = $('urlFeatures');
+            featuresEl.innerHTML = '<h4>Extracted Features:</h4>';
+            const featuresPre = document.createElement('pre');
+            featuresPre.textContent = JSON.stringify(data.features, null, 2);
+            featuresEl.appendChild(featuresPre);
+
+            urlResult.className = `result ${status.cls} show`;
+        }
+        
+        function downloadBlob(blob, name) {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        $('urlInput').onkeypress = e => {
+            if (e.key === 'Enter') $('urlSubmitBtn').click();
+        };
+    </script>
+</body>
+</html>

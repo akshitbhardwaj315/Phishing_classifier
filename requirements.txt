@@ -1,0 +1,32 @@
+# requirements.txt
+
+# --- Core API ---
+fastapi
+uvicorn[standard]
+gunicorn
+python-multipart==0.0.6
+aiofiles
+jinja2==3.1.2
+
+# --- ML & Data ---
+pandas
+numpy
+xgboost==1.6.2
+imblearn==0.0
+neuro-mf==0.0.5
+dill==0.3.5.1
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# --- Utilities ---
+python-dotenv==0.21.0
+dnspython==2.2.1
+pymongo==4.2.0
+boto3==1.26.105
+mypy-boto3-s3==1.24.76
+types-s3transfer==0.6.0.post4
+evidently==0.4.31
+tldextract
+# --- Removed ---
+# Flask, Werkzeug (Replaced by FastAPI)
+# -e . (Not for Docker builds)

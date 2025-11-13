@@ -1,0 +1,32 @@
+# This file tells Docker to IGNORE certain files when building.
+# This speeds up the build and keeps the image clean and secure.
+
+# --- Docker ---
+Dockerfile
+.dockerignore
+
+# --- Git / IDE ---
+.git/
+.gitignore
+.vscode/
+README.md
+
+# --- Python ---
+# Ignore local virtual environments
+venv/
+.venv/
+env/
+
+# Ignore compiled python and caches
+__pycache__/
+*.pyc
+
+# --- Project Specific ---
+# NEVER copy secrets into your image
+.env
+
+# Do not copy local data or trained models (artifacts)
+# These should be downloaded from S3/cloud storage at runtime.
+data/
+artifacts/
+model.pkl
