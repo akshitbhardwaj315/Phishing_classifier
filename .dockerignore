@@ -28,5 +28,5 @@ __pycache__/
 # Do not copy local data or trained models (artifacts)
 # These should be downloaded from S3/cloud storage at runtime.
 data/
-artifacts/
+# artifacts/
 # model.pkl
