@@ -133,7 +133,7 @@ docker build -t phishing-api .
 docker run -d -p 8000:8000 --name phishing-app phishing-api
 ```
 
-✅ **Access the app:** http://127.0.0.1:8000/docs
+✅ **Access the app:** http://127.0.0.1:8000/
 
 ---
 
@@ -155,7 +155,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-✅ **Access the app:** http://127.0.0.1:8000/docs
+✅ **Access the app:** http://127.0.0.1:8000/
 
 ---
 
